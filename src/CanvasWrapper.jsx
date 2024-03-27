@@ -1,18 +1,20 @@
-import React from 'react'
 import { Canvas } from './components/Canvas'
 import { Tools } from './components/Tools'
 
-import { useCanvas } from './hooks/useCanvas'
 import { CanvasProvider } from './contexts/CanvasContext'
+import { usePaintContext } from './contexts/PaintContext'
+
+import { useCanvas } from './hooks/useCanvas'
 
 export function CanvasWrapper() {
-  const { canvasRef, ctx } = useCanvas()
+  const { canvasRef } = useCanvas()
+  const { handlePaint } = usePaintContext()
 
   function handleClick(e) {
-    ctx.current.fillStyle = '#fff'
-    ctx.current.beginPath()
-    ctx.current.arc(e.clientX, e.clientY, 20, 0, 2 * Math.PI)
-    ctx.current.fill()
+    handlePaint({
+      x: e.clientX,
+      y: e.clientY,
+    })
   }
 
   return (

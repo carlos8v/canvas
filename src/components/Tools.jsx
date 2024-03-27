@@ -1,33 +1,73 @@
 import { useState } from 'react'
-import { Minus, Circle, Square } from 'react-feather'
+import { MousePointer, Minus, Circle, Square } from 'react-feather'
 
 import { classnames } from '../utils/classnames'
+import { usePaintContext } from '../contexts/PaintContext'
 
 const tools = [
   {
+    id: 'pointer',
+    label: 'Seleção',
+    Icon: ({ active }) => (
+      <MousePointer
+        className={classnames({
+          'w-5 h-5 text-white transition': true,
+          'fill-white': active,
+        })}
+      />
+    ),
+  },
+  {
     id: 'line',
     label: 'Linha',
-    Icon: <Minus className="w-6 h-6 text-white" />,
+    Icon: () => <Minus className="w-6 h-6 text-white transition" />,
   },
   {
     id: 'circle',
     label: 'Elipse',
-    Icon: <Circle className="w-6 h-6 text-white" />,
+    Icon: ({ active }) => (
+      <Circle
+        className={classnames({
+          'w-6 h-6 text-white transition': true,
+          'fill-white': active,
+        })}
+      />
+    ),
   },
   {
     id: 'square',
     label: 'Retângulo',
-    Icon: <Square className="w-6 h-6 text-white" />,
+    Icon: ({ active }) => (
+      <Square
+        className={classnames({
+          'w-6 h-6 text-white transition': true,
+          'fill-white': active,
+        })}
+      />
+    ),
   },
   {
     id: 'diamond',
     label: 'Losango',
-    Icon: <Square className="w-6 h-5 text-white rotate-45" />,
+    Icon: ({ active }) => (
+      <Square
+        className={classnames({
+          'w-6 h-5 text-white rotate-45 transition': true,
+          'fill-white': active,
+        })}
+      />
+    ),
   },
 ]
 
 export const Tools = () => {
+  const { setMode } = usePaintContext()
   const [selectedToolIdx, setSelectedToolIdx] = useState(0)
+
+  function handleSelectTool(id, idx) {
+    setMode(id)
+    setSelectedToolIdx(idx)
+  }
 
   return (
     <div className="fixed top-0 left-1/2 -translate-x-1/2 mt-4 p-2 bg-zinc-900 z-10 rounded-lg flex gap-2">
@@ -36,14 +76,14 @@ export const Tools = () => {
           key={id}
           type="button"
           title={label}
-          onClick={() => setSelectedToolIdx(idx)}
+          onClick={() => handleSelectTool(id, idx)}
           className={classnames({
             'rounded-lg cursor-pointer p-3 transition relative': true,
             'hover:bg-zinc-800': idx !== selectedToolIdx,
             'bg-violet-500/40': idx === selectedToolIdx,
           })}
         >
-          {Icon}
+          <Icon active={idx === selectedToolIdx} />
           <span className="absolute bottom-0 right-1 text-sm font-thin text-zinc-400 select-none">
             {idx + 1}
           </span>

@@ -1,17 +1,17 @@
 import { useRef, useEffect, useState, forwardRef } from 'react'
 
+import { classnames } from '../utils/classnames'
+import { usePaintContext } from '../contexts/PaintContext'
+
 export const Canvas = forwardRef((props, ref) => {
   const wrapperRef = useRef(null)
   const [canvasWidth, setCanvasWidth] = useState(0)
   const [canvasHeight, setCanvasHeight] = useState(0)
 
+  const { mode, draw } = usePaintContext()
+
   useEffect(() => {
     getCanvasDimensions()
-
-    const canvas = ref.current
-    const context = canvas.getContext('2d')
-    context.fillStyle = '#09090b'
-    context.fillRect(0, 0, context.canvas.width, context.canvas.height)
   }, [])
 
   useEffect(() => {
@@ -21,6 +21,10 @@ export const Canvas = forwardRef((props, ref) => {
       window.removeEventListener('resize', getCanvasDimensions)
     }
   }, [])
+
+  useEffect(() => {
+    draw()
+  }, [canvasWidth, canvasHeight])
 
   function getCanvasDimensions() {
     if (wrapperRef.current) {
@@ -37,6 +41,9 @@ export const Canvas = forwardRef((props, ref) => {
         width={canvasWidth}
         height={canvasHeight}
         onClick={props.onClick}
+        className={classnames({
+          'cursor-crosshair': mode !== 'pointer',
+        })}
         {...props}
       ></canvas>
     </div>
