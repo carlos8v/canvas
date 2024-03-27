@@ -1,15 +1,19 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
+import { useCanvasContext } from '../contexts/CanvasContext'
 
 export const useCanvas = () => {
-  const canvasRef = useRef(null)
+  const canvasCtx = useRef(null)
+  const canvasRef = useCanvasContext()
 
-  function getContext() {
-    const canvas = canvasRef.current
-    return canvas.getContext('2d')
-  }
+  useEffect(() => {
+    if (canvasRef.current) {
+      const canvas = canvasRef.current
+      canvasCtx.current = canvas.getContext('2d')
+    }
+  }, [canvasRef.current])
 
   return {
+    ctx: canvasCtx,
     canvasRef,
-    getContext,
   }
 }
