@@ -7,7 +7,7 @@ import { bindEvents } from '../utils/events'
 
 const tools = [
   {
-    id: 'pointer',
+    id: 'selection',
     label: 'Seleção',
     Icon: ({ active }) => (
       <MousePointer
@@ -62,7 +62,7 @@ const tools = [
 ]
 
 export const Tools = () => {
-  const { setMode } = usePaintContext()
+  const { changeMode } = usePaintContext()
   const [selectedToolIdx, setSelectedToolIdx] = useState(0)
 
   useEffect(() => {
@@ -76,7 +76,7 @@ export const Tools = () => {
   }, [])
 
   function handleSelectTool(id, idx) {
-    setMode(id)
+    changeMode(id)
     setSelectedToolIdx(idx)
   }
 

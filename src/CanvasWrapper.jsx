@@ -9,8 +9,15 @@ import { useCanvas } from './hooks/useCanvas'
 
 export function CanvasWrapper() {
   const { canvasRef } = useCanvas()
-  const { handlePaint, isDrawing, setPreviewPoint, cancelPreview } =
-    usePaintContext()
+  const {
+    mode,
+    handlePaint,
+    isDrawing,
+    setPreviewPoint,
+    cancelPreview,
+    selectShape,
+    checkHoveringShape,
+  } = usePaintContext()
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyboard)
@@ -25,6 +32,8 @@ export function CanvasWrapper() {
   }
 
   function handleOriginPosition(e) {
+    if (mode === 'selection') return
+
     handlePaint({
       x: e.clientX,
       y: e.clientY,
@@ -32,6 +41,15 @@ export function CanvasWrapper() {
   }
 
   function handleEndPosition(e) {
+    if (mode === 'selection') {
+      selectShape({
+        x: e.clientX,
+        y: e.clientY,
+      })
+
+      return
+    }
+
     if (isDrawing) {
       handlePaint({
         x: e.clientX,
@@ -41,6 +59,15 @@ export function CanvasWrapper() {
   }
 
   function handlePreview(e) {
+    if (mode === 'selection') {
+      checkHoveringShape({
+        x: e.clientX,
+        y: e.clientY,
+      })
+
+      return
+    }
+
     if (isDrawing) {
       setPreviewPoint({
         x: e.clientX,

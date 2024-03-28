@@ -4,16 +4,25 @@ import { useCanvas } from '../hooks/useCanvas'
 
 import { usePaintStore } from '../store/paintStore'
 import { bindEvents } from '../utils/events'
-import { drawBackground, drawByType } from '../utils/draw'
+import {
+  createShape,
+  drawBackground,
+  drawByType,
+  hasSelectShape,
+} from '../utils/canvas'
 
 const paintContext = createContext({
-  mode: 'pointer',
-  setMode: () => {},
+  mode: 'selection',
+  changeMode: () => {},
   handlePaint: () => {},
   draw: () => {},
   isDrawing: false,
   setPreviewPoint: () => {},
   cancelPreview: () => {},
+  selectedShape: null,
+  selectShape: () => {},
+  isHovering: false,
+  checkHoveringShape: () => {},
 })
 
 export const usePaintContext = () => useContext(paintContext)
@@ -21,11 +30,17 @@ export const usePaintContext = () => useContext(paintContext)
 export const PaintProvider = ({ children }) => {
   const { ctx } = useCanvas()
 
-  const drawings = usePaintStore((store) => store.drawings)
-  const addDraw = usePaintStore((store) => store.addDraw)
+  const shapes = usePaintStore((store) => store.shapes)
+  const addShape = usePaintStore((store) => store.addShape)
+
+  const selectedShape = usePaintStore((store) => store.selectedShape)
+  const setSelectedShape = usePaintStore((store) => store.setSelectedShape)
 
   const mode = usePaintStore((store) => store.mode)
   const setMode = usePaintStore((store) => store.setMode)
+
+  const isHovering = usePaintStore((store) => store.isHovering)
+  const setIsHovering = usePaintStore((store) => store.setIsHovering)
 
   const isDrawing = usePaintStore((store) => store.isDrawing)
   const setIsDrawing = usePaintStore((store) => store.setIsDrawing)
@@ -59,7 +74,16 @@ export const PaintProvider = ({ children }) => {
 
   useEffect(() => {
     draw()
-  }, [drawings, previewPoint])
+  }, [shapes, previewPoint, selectedShape])
+
+  function changeMode(newMode) {
+    setMode(newMode)
+
+    if (newMode !== 'selection') {
+      setSelectedShape(null)
+      setIsHovering(false)
+    }
+  }
 
   function handlePaint({ x, y }) {
     if (!isDrawing) {
@@ -71,12 +95,13 @@ export const PaintProvider = ({ children }) => {
     setIsDrawing(false)
 
     if (originPoint.x !== x && originPoint.y !== y) {
-      addDraw({
-        id: new Date().toISOString(),
-        type: mode,
-        proportional,
-        positions: [originPoint, { x, y }],
-      })
+      addShape(
+        createShape({
+          type: mode,
+          proportional,
+          positions: [originPoint, { x, y }],
+        })
+      )
     }
 
     setOriginPoint({ x: 0, y: 0 })
@@ -94,15 +119,60 @@ export const PaintProvider = ({ children }) => {
     }
   }
 
+  function drawSelection() {
+    if (!selectedShape) return
+
+    const drawFn = drawByType[selectedShape.type]
+    if (drawFn) drawFn(ctx.current, { ...selectedShape, selected: true })
+  }
+
   function draw() {
     if (!ctx.current) return
 
     drawBackground(ctx.current)
-    for (const drawing of drawings) {
-      const drawFn = drawByType[drawing.type]
-      if (drawFn) drawFn(ctx.current, drawing)
+    for (const shape of shapes) {
+      const drawFn = drawByType[shape.type]
+      if (drawFn) drawFn(ctx.current, shape)
     }
     drawPreview()
+    drawSelection()
+  }
+
+  function selectShape(selectPoint) {
+    for (const shape of shapes) {
+      if (shape.type === 'line') continue
+
+      if (hasSelectShape(selectPoint, shape)) {
+        setSelectedShape(shape)
+        break
+      } else {
+        setSelectedShape(null)
+      }
+    }
+  }
+
+  function isHoveringShape(selectPoint) {
+    for (const shape of shapes) {
+      if (shape.type === 'line') continue
+
+      if (hasSelectShape(selectPoint, shape)) {
+        return shape
+      }
+    }
+
+    return null
+  }
+
+  function selectShape(selectPoint) {
+    if (mode !== 'selection') return
+    const hoveredShape = isHoveringShape(selectPoint)
+    setSelectedShape(hoveredShape ?? null)
+  }
+
+  function checkHoveringShape(selectPoint) {
+    if (mode !== 'selection') return
+    const hoveredShape = isHoveringShape(selectPoint)
+    setIsHovering(Boolean(hoveredShape?.id))
   }
 
   function cancelPreview() {
@@ -115,12 +185,16 @@ export const PaintProvider = ({ children }) => {
     <paintContext.Provider
       value={{
         mode,
-        setMode,
+        changeMode,
         handlePaint,
         draw,
         isDrawing,
         setPreviewPoint,
         cancelPreview,
+        selectedShape,
+        selectShape,
+        isHovering,
+        checkHoveringShape,
       }}
     >
       {children}

@@ -8,7 +8,7 @@ export const Canvas = forwardRef((props, ref) => {
   const [canvasWidth, setCanvasWidth] = useState(0)
   const [canvasHeight, setCanvasHeight] = useState(0)
 
-  const { mode, draw } = usePaintContext()
+  const { mode, draw, selectedShape, isHovering } = usePaintContext()
 
   useEffect(() => {
     getCanvasDimensions()
@@ -41,7 +41,8 @@ export const Canvas = forwardRef((props, ref) => {
         width={canvasWidth}
         height={canvasHeight}
         className={classnames({
-          'cursor-crosshair': mode !== 'pointer',
+          'cursor-crosshair': mode !== 'selection',
+          'cursor-move': isHovering,
         })}
         {...props}
       ></canvas>

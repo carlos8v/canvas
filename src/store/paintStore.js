@@ -1,15 +1,19 @@
 import { create } from 'zustand'
 
 export const usePaintStore = create((set) => ({
-  drawings: [],
-  addDraw: (newDraw) => {
-    set(({ drawings: prevDrawings }) => ({
-      drawings: [...prevDrawings, newDraw],
+  shapes: [],
+  addShape: (newShape) => {
+    set(({ shapes: prevShapes }) => ({
+      shapes: [newShape, ...prevShapes],
     }))
   },
+  isHovering: false,
+  setIsHovering: (isHovering) => set({ isHovering }),
+  selectedShape: null,
+  setSelectedShape: (selectedShape) => set({ selectedShape }),
   proportional: false,
   setProportional: (proportional) => set({ proportional }),
-  mode: 'pointer',
+  mode: 'selection',
   setMode: (mode) => set({ mode }),
   isDrawing: false,
   setIsDrawing: (isDrawing) => set({ isDrawing }),

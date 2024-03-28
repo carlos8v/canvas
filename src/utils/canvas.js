@@ -43,14 +43,15 @@ export function drawLine(ctx, { positions }) {
   ctx.stroke()
 }
 
-export function drawEllipse(ctx, { positions, proportional = false }) {
+export function drawEllipse(ctx, shape) {
+  const { positions, proportional = false } = shape
   const [originPoint, endPoint] = positions
+
+  const width = shape?.width ?? endPoint.x - originPoint.x
+  const height = shape?.height ?? endPoint.y - originPoint.y
 
   // TODO: remove mocked
   ctx.strokeStyle = '#fff'
-
-  const width = endPoint.x - originPoint.x
-  const height = endPoint.y - originPoint.y
 
   if (proportional) {
     const xMiddle = originPoint.x + width / 2
@@ -92,18 +93,17 @@ export function drawEllipse(ctx, { positions, proportional = false }) {
   ctx.stroke()
 }
 
-export function drawRectangle(
-  ctx,
-  { positions, proportional = false, selected = false }
-) {
+export function drawRectangle(ctx, shape) {
+  const { positions, proportional = false, selected = false } = shape
   const [originPoint, endPoint] = positions
+
+  const width = shape?.width ?? Math.abs(endPoint.x - originPoint.x)
+  const height = shape?.height ?? Math.abs(endPoint.y - originPoint.y)
 
   // TODO: remove mocked
   ctx.strokeStyle = '#fff'
   ctx.lineWidth = 2
 
-  const width = Math.abs(endPoint.x - originPoint.x)
-  const height = Math.abs(endPoint.y - originPoint.y)
   const maxOffset = Math.max(width, height)
   const offsetX = proportional ? maxOffset : width
   const offsetY = proportional ? maxOffset : height
@@ -135,11 +135,12 @@ export function drawRectangle(
   }
 }
 
-export function drawDiamond(ctx, { positions, proportional = false }) {
+export function drawDiamond(ctx, shape) {
+  const { positions, proportional = false } = shape
   const [originPoint, endPoint] = positions
 
-  const width = Math.abs(endPoint.x - originPoint.x)
-  const height = Math.abs(endPoint.y - originPoint.y)
+  const width = shape?.width ?? Math.abs(endPoint.x - originPoint.x)
+  const height = shape?.height ?? Math.abs(endPoint.y - originPoint.y)
 
   // TODO: remove mocked
   ctx.strokeStyle = '#fff'
@@ -164,6 +165,43 @@ export function drawDiamond(ctx, { positions, proportional = false }) {
   ctx.lineTo(xm + offsetX / 2, ym) // bottom right edge
   ctx.lineTo(xm, y) // top right edge
   ctx.stroke()
+}
+
+export function hasSelectShape(selectPoint, shape) {
+  const { positions, width, height } = shape
+  const [p1, p2] = positions
+
+  const boundingMinPoint = getTopLeftPoint(p1, p2, width, height)
+  const boundingMaxPoint = {
+    x: Math.max(p1.x, p2.x),
+    y: Math.max(p1.y, p2.y),
+  }
+
+  if (
+    selectPoint.x >= boundingMinPoint.x &&
+    selectPoint.x <= boundingMaxPoint.x &&
+    selectPoint.y >= boundingMinPoint.y &&
+    selectPoint.y <= boundingMaxPoint.y
+  ) {
+    return true
+  }
+
+  return false
+}
+
+export function createShape({ type, proportional, positions }) {
+  const [p1, p2] = positions
+  const width = Math.abs(p2.x - p1.x)
+  const height = Math.abs(p2.y - p1.y)
+
+  return {
+    id: new Date().toISOString(),
+    type,
+    width,
+    height,
+    proportional,
+    positions,
+  }
 }
 
 export const drawByType = {
