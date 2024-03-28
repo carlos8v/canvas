@@ -17,9 +17,6 @@ const paintContext = createContext({
 
 export const usePaintContext = () => useContext(paintContext)
 
-// TODO: remove supported form verification
-const supportedForms = new Set(['line', 'ellipse', 'rectangle'])
-
 export const PaintProvider = ({ children }) => {
   const { ctx } = useCanvas()
 
@@ -51,12 +48,7 @@ export const PaintProvider = ({ children }) => {
 
     setIsDrawing(false)
 
-    // TODO: remove supported form verification
-    if (
-      originPoint.x !== x &&
-      originPoint.y !== y &&
-      supportedForms.has(mode)
-    ) {
+    if (originPoint.x !== x && originPoint.y !== y) {
       addDraw({
         id: new Date().toISOString(),
         type: mode,
