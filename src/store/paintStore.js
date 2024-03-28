@@ -11,6 +11,8 @@ export const usePaintStore = create((set) => ({
   setMode: (mode) => set({ mode }),
   isDrawing: false,
   setIsDrawing: (isDrawing) => set({ isDrawing }),
-  firstPoint: { x: 0, y: 0 },
-  setFirstPoint: ({ x, y }) => set({ firstPoint: { x, y } }),
+  previewPoint: { x: 0, y: 0 },
+  setPreviewPoint: ({ x, y }) => set({ previewPoint: { x, y } }),
+  originPoint: { x: 0, y: 0 },
+  setOriginPoint: ({ x, y }) => set({ originPoint: { x, y } }),
 }))

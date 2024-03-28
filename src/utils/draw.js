@@ -7,15 +7,15 @@ export function drawBackground(ctx) {
 }
 
 export function drawLine(ctx, { positions }) {
-  const [p1, p2] = positions
+  const [originPoint, endPoint] = positions
 
   // TODO: remove mocked
   ctx.strokeStyle = '#fff'
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 2
 
   ctx.beginPath()
-  ctx.moveTo(p1.x, p1.y)
-  ctx.lineTo(p2.x, p2.y)
+  ctx.moveTo(originPoint.x, originPoint.y)
+  ctx.lineTo(endPoint.x, endPoint.y)
   ctx.stroke()
 }
 

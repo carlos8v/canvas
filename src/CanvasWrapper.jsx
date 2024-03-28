@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Canvas } from './components/Canvas'
 import { Tools } from './components/Tools'
 
@@ -8,7 +9,20 @@ import { useCanvas } from './hooks/useCanvas'
 
 export function CanvasWrapper() {
   const { canvasRef } = useCanvas()
-  const { handlePaint } = usePaintContext()
+  const { handlePaint, isDrawing, setPreviewPoint, cancelPreview } =
+    usePaintContext()
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyboard)
+
+    return () => window.removeEventListener('keydown', handleKeyboard)
+  }, [])
+
+  function handleKeyboard(e) {
+    if (e.key === 'Escape') {
+      cancelPreview()
+    }
+  }
 
   function handleClick(e) {
     handlePaint({
@@ -17,11 +31,24 @@ export function CanvasWrapper() {
     })
   }
 
+  function onMoveMouse(e) {
+    if (isDrawing) {
+      setPreviewPoint({
+        x: e.clientX,
+        y: e.clientY,
+      })
+    }
+  }
+
   return (
     <CanvasProvider>
       <main className="min-w-screen min-h-screen flex flex-col bg-zinc-950">
         <Tools />
-        <Canvas ref={canvasRef} onClick={handleClick} />
+        <Canvas
+          ref={canvasRef}
+          onClick={handleClick}
+          onMouseMove={onMoveMouse}
+        />
       </main>
     </CanvasProvider>
   )
