@@ -1,9 +1,33 @@
+function getTopLeftPoint(p1, p2, offsetX = 0, offsetY = 0) {
+  return {
+    x: p1.x <= p2.x ? p1.x : p1.x - offsetX,
+    y: p1.y <= p2.y ? p1.y : p1.y - offsetY,
+  }
+}
+
 export function drawBackground(ctx) {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
   // TODO: remove mocked
-  ctx.fillStyle = '#09090b'
+  ctx.fillStyle = '#09090B'
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+}
+
+export function drawBoundingBox(ctx, originPoint, width, height) {
+  const padding = 10
+
+  // TODO: remove mocked
+  ctx.strokeStyle = '#8B5CF6'
+  ctx.lineWidth = 2
+
+  ctx.beginPath()
+  ctx.rect(
+    originPoint.x - padding,
+    originPoint.y - padding,
+    width + padding * 2,
+    height + padding * 2
+  )
+  ctx.stroke()
 }
 
 export function drawLine(ctx, { positions }) {
@@ -29,11 +53,12 @@ export function drawEllipse(ctx, { positions, proportional = false }) {
   const height = endPoint.y - originPoint.y
 
   if (proportional) {
-    const xm = originPoint.x + width / 2
-    const ym = originPoint.y + height / 2
+    const xMiddle = originPoint.x + width / 2
+    const yMiddle = originPoint.y + height / 2
 
     const distance = Math.sqrt(
-      Math.pow(xm - originPoint.x, 2) + Math.pow(ym - originPoint.y, 2)
+      Math.pow(xMiddle - originPoint.x, 2) +
+        Math.pow(yMiddle - originPoint.y, 2)
     )
 
     ctx.beginPath()
@@ -67,40 +92,49 @@ export function drawEllipse(ctx, { positions, proportional = false }) {
   ctx.stroke()
 }
 
-export function drawRectangle(ctx, { positions, proportional = false }) {
+export function drawRectangle(
+  ctx,
+  { positions, proportional = false, selected = false }
+) {
   const [originPoint, endPoint] = positions
-
-  const width = Math.abs(endPoint.x - originPoint.x)
-  const height = Math.abs(endPoint.y - originPoint.y)
 
   // TODO: remove mocked
   ctx.strokeStyle = '#fff'
   ctx.lineWidth = 2
 
-  if (proportional) {
-    const distance = Math.max(width, height)
-    const x =
-      originPoint.x <= endPoint.x
-        ? Math.min(originPoint.x, endPoint.x)
-        : Math.max(originPoint.x, endPoint.x) - distance
+  const width = Math.abs(endPoint.x - originPoint.x)
+  const height = Math.abs(endPoint.y - originPoint.y)
+  const offset = Math.max(width, height)
 
-    const y =
-      originPoint.y <= endPoint.y
-        ? Math.min(originPoint.y, endPoint.y)
-        : Math.max(originPoint.y, endPoint.y) - distance
+  if (proportional) {
+    const { x, y } = getTopLeftPoint(originPoint, endPoint, offset, offset)
 
     ctx.beginPath()
-    ctx.rect(x, y, distance, distance)
+    ctx.rect(x, y, offset, offset)
     ctx.stroke()
-    return
+  } else {
+    const x = Math.min(originPoint.x, endPoint.x)
+    const y = Math.min(originPoint.y, endPoint.y)
+
+    ctx.beginPath()
+    ctx.rect(x, y, width, height)
+    ctx.stroke()
   }
 
-  const x = Math.min(originPoint.x, endPoint.x)
-  const y = Math.min(originPoint.y, endPoint.y)
-
-  ctx.beginPath()
-  ctx.rect(x, y, width, height)
-  ctx.stroke()
+  if (selected) {
+    const startBoxPoint = getTopLeftPoint(
+      originPoint,
+      endPoint,
+      proportional ? offset : width,
+      proportional ? offset : height
+    )
+    drawBoundingBox(
+      ctx,
+      startBoxPoint,
+      proportional ? offset : width,
+      proportional ? offset : height
+    )
+  }
 }
 
 export function drawDiamond(ctx, { positions, proportional = false }) {
