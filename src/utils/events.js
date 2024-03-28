@@ -9,8 +9,8 @@ import mousetrap from 'mousetrap'
  * }, [])
  */
 export function bindEvents(events) {
-  for (const { key, cb } of events) {
-    mousetrap.bind(key, cb)
+  for (const { key, cb, option = undefined } of events) {
+    mousetrap.bind(key, cb, option)
   }
 
   return () => {

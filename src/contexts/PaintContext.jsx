@@ -1,8 +1,9 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect } from 'react'
 
 import { useCanvas } from '../hooks/useCanvas'
 
 import { usePaintStore } from '../store/paintStore'
+import { bindEvents } from '../utils/events'
 import { drawBackground, drawByType } from '../utils/draw'
 
 const paintContext = createContext({
@@ -29,11 +30,32 @@ export const PaintProvider = ({ children }) => {
   const isDrawing = usePaintStore((store) => store.isDrawing)
   const setIsDrawing = usePaintStore((store) => store.setIsDrawing)
 
+  const proportional = usePaintStore((store) => store.proportional)
+  const setProportional = usePaintStore((store) => store.setProportional)
+
   const originPoint = usePaintStore((store) => store.originPoint)
   const setOriginPoint = usePaintStore((store) => store.setOriginPoint)
 
   const previewPoint = usePaintStore((store) => store.previewPoint)
   const setPreviewPoint = usePaintStore((store) => store.setPreviewPoint)
+
+  useEffect(() => {
+    const events = [
+      {
+        key: 'shift',
+        option: 'keydown',
+        cb: () => setProportional(true),
+      },
+      {
+        key: 'shift',
+        option: 'keyup',
+        cb: () => setProportional(false),
+      },
+    ]
+
+    const cleanup = bindEvents(events)
+    return () => cleanup()
+  }, [])
 
   useEffect(() => {
     draw()
@@ -52,6 +74,7 @@ export const PaintProvider = ({ children }) => {
       addDraw({
         id: new Date().toISOString(),
         type: mode,
+        proportional,
         positions: [originPoint, { x, y }],
       })
     }
@@ -65,6 +88,7 @@ export const PaintProvider = ({ children }) => {
       if (drawFn) {
         drawFn(ctx.current, {
           positions: [originPoint, previewPoint],
+          proportional,
         })
       }
     }

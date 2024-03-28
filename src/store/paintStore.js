@@ -7,6 +7,8 @@ export const usePaintStore = create((set) => ({
       drawings: [...prevDrawings, newDraw],
     }))
   },
+  proportional: false,
+  setProportional: (proportional) => set({ proportional }),
   mode: 'pointer',
   setMode: (mode) => set({ mode }),
   isDrawing: false,
