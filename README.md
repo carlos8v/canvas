@@ -12,7 +12,7 @@ Virtual whiteboard sketching app
   - [x] Viewport canvas
   - [ ] Zoom canvas
   - [ ] Move canvas
-- Draw
+- [ ] Draw
   - [x] Forms
     - [x] Line
     - [x] Ellipse
