@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { MousePointer, Minus, Circle, Square } from 'react-feather'
 
 import { classnames } from '../utils/classnames'
 import { usePaintContext } from '../contexts/PaintContext'
+import { bindEvents } from '../utils/events'
 
 const tools = [
   {
@@ -63,6 +64,16 @@ const tools = [
 export const Tools = () => {
   const { setMode } = usePaintContext()
   const [selectedToolIdx, setSelectedToolIdx] = useState(0)
+
+  useEffect(() => {
+    const events = tools.map(({ id }, idx) => ({
+      key: `${idx + 1}`,
+      cb: () => handleSelectTool(id, idx),
+    }))
+
+    const cleanup = bindEvents(events)
+    return () => cleanup()
+  }, [])
 
   function handleSelectTool(id, idx) {
     setMode(id)
