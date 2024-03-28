@@ -36,7 +36,7 @@ const tools = [
     ),
   },
   {
-    id: 'square',
+    id: 'rectangle',
     label: 'Retângulo',
     Icon: ({ active }) => (
       <Square

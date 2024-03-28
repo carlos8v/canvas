@@ -32,12 +32,12 @@ export function drawEllipse(ctx, { positions, proportional = false }) {
     const xm = originPoint.x + width / 2
     const ym = originPoint.y + height / 2
 
-    const radius = Math.sqrt(
+    const distance = Math.sqrt(
       Math.pow(xm - originPoint.x, 2) + Math.pow(ym - originPoint.y, 2)
     )
 
     ctx.beginPath()
-    ctx.arc(xm, ym, radius, 0, Math.PI * 2)
+    ctx.arc(xm, ym, distance, 0, Math.PI * 2)
     ctx.stroke()
 
     return
@@ -67,7 +67,44 @@ export function drawEllipse(ctx, { positions, proportional = false }) {
   ctx.stroke()
 }
 
+export function drawRectangle(ctx, { positions, proportional = false }) {
+  const [originPoint, endPoint] = positions
+
+  const width = Math.abs(endPoint.x - originPoint.x)
+  const height = Math.abs(endPoint.y - originPoint.y)
+
+  // TODO: remove mocked
+  ctx.strokeStyle = '#fff'
+  ctx.lineWidth = 2
+
+  if (proportional) {
+    const distance = Math.max(width, height)
+    const x =
+      originPoint.x <= endPoint.x
+        ? Math.min(originPoint.x, endPoint.x)
+        : Math.max(originPoint.x, endPoint.x) - distance
+
+    const y =
+      originPoint.y <= endPoint.y
+        ? Math.min(originPoint.y, endPoint.y)
+        : Math.max(originPoint.y, endPoint.y) - distance
+
+    ctx.beginPath()
+    ctx.rect(x, y, distance, distance)
+    ctx.stroke()
+    return
+  }
+
+  const x = Math.min(originPoint.x, endPoint.x)
+  const y = Math.min(originPoint.y, endPoint.y)
+
+  ctx.beginPath()
+  ctx.rect(x, y, width, height)
+  ctx.stroke()
+}
+
 export const drawByType = {
   line: drawLine,
   ellipse: drawEllipse,
+  rectangle: drawRectangle,
 }

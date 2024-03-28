@@ -15,7 +15,7 @@ Virtual whiteboard sketching app
 - [x] Draw forms
   - [x] Line
   - [x] Ellipse
-  - [ ] Square
+  - [x] Rectangle
   - [ ] Diamond
 - [ ] Draw text
 - [ ] Import images

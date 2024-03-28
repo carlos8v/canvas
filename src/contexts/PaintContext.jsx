@@ -18,7 +18,7 @@ const paintContext = createContext({
 export const usePaintContext = () => useContext(paintContext)
 
 // TODO: remove supported form verification
-const supportedForms = new Set(['line', 'ellipse'])
+const supportedForms = new Set(['line', 'ellipse', 'rectangle'])
 
 export const PaintProvider = ({ children }) => {
   const { ctx } = useCanvas()
