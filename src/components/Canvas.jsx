@@ -40,7 +40,6 @@ export const Canvas = forwardRef((props, ref) => {
         ref={ref}
         width={canvasWidth}
         height={canvasHeight}
-        onClick={props.onClick}
         className={classnames({
           'cursor-crosshair': mode !== 'pointer',
         })}

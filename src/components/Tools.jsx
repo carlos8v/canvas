@@ -11,7 +11,7 @@ const tools = [
     Icon: ({ active }) => (
       <MousePointer
         className={classnames({
-          'w-5 h-5 text-white transition': true,
+          'w-6 h-5 text-white transition': true,
           'fill-white': active,
         })}
       />

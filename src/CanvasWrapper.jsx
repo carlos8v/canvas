@@ -24,14 +24,23 @@ export function CanvasWrapper() {
     }
   }
 
-  function handleClick(e) {
+  function handleOriginPosition(e) {
     handlePaint({
       x: e.clientX,
       y: e.clientY,
     })
   }
 
-  function onMoveMouse(e) {
+  function handleEndPosition(e) {
+    if (isDrawing) {
+      handlePaint({
+        x: e.clientX,
+        y: e.clientY,
+      })
+    }
+  }
+
+  function handlePreview(e) {
     if (isDrawing) {
       setPreviewPoint({
         x: e.clientX,
@@ -46,8 +55,9 @@ export function CanvasWrapper() {
         <Tools />
         <Canvas
           ref={canvasRef}
-          onClick={handleClick}
-          onMouseMove={onMoveMouse}
+          onMouseDown={handleOriginPosition}
+          onMouseMove={handlePreview}
+          onClick={handleEndPosition}
         />
       </main>
     </CanvasProvider>

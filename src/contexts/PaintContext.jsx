@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 
 import { useCanvas } from '../hooks/useCanvas'
 
@@ -51,7 +51,6 @@ export const PaintProvider = ({ children }) => {
 
     setIsDrawing(false)
 
-    console.log(mode, x, y)
     // TODO: remove supported form verification
     if (
       originPoint.x !== x &&
