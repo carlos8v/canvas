@@ -23,7 +23,7 @@ const tools = [
     Icon: () => <Minus className="w-6 h-6 text-white transition" />,
   },
   {
-    id: 'circle',
+    id: 'ellipse',
     label: 'Elipse',
     Icon: ({ active }) => (
       <Circle

@@ -14,7 +14,7 @@ Virtual whiteboard sketching app
   - [ ] Move canvas
 - [x] Draw forms
   - [x] Line
-  - [ ] Circle
+  - [x] Ellipse
   - [ ] Square
   - [ ] Diamond
 - [ ] Draw text

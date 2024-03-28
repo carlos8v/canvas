@@ -17,6 +17,9 @@ const paintContext = createContext({
 
 export const usePaintContext = () => useContext(paintContext)
 
+// TODO: remove supported form verification
+const supportedForms = new Set(['line', 'ellipse'])
+
 export const PaintProvider = ({ children }) => {
   const { ctx } = useCanvas()
 
@@ -40,25 +43,29 @@ export const PaintProvider = ({ children }) => {
   }, [drawings, previewPoint])
 
   function handlePaint({ x, y }) {
-    if (mode === 'line') {
-      if (!isDrawing) {
-        setOriginPoint({ x, y })
-        setIsDrawing(true)
-        return
-      }
-
-      setIsDrawing(false)
-
-      if (originPoint.x !== x && originPoint.y !== y) {
-        addDraw({
-          id: new Date().toISOString(),
-          type: 'line',
-          positions: [originPoint, { x, y }],
-        })
-      }
-
-      setOriginPoint({ x: 0, y: 0 })
+    if (!isDrawing) {
+      setOriginPoint({ x, y })
+      setIsDrawing(true)
+      return
     }
+
+    setIsDrawing(false)
+
+    console.log(mode, x, y)
+    // TODO: remove supported form verification
+    if (
+      originPoint.x !== x &&
+      originPoint.y !== y &&
+      supportedForms.has(mode)
+    ) {
+      addDraw({
+        id: new Date().toISOString(),
+        type: mode,
+        positions: [originPoint, { x, y }],
+      })
+    }
+
+    setOriginPoint({ x: 0, y: 0 })
   }
 
   function drawPreview() {
