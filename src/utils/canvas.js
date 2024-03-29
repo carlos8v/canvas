@@ -44,61 +44,82 @@ export function drawLine(ctx, { positions }) {
 }
 
 export function drawEllipse(ctx, shape) {
-  const { positions, proportional = false } = shape
+  const { positions, proportional = false, selected = false } = shape
   const [originPoint, endPoint] = positions
-
-  const width = shape?.width ?? endPoint.x - originPoint.x
-  const height = shape?.height ?? endPoint.y - originPoint.y
 
   // TODO: remove mocked
   ctx.strokeStyle = '#fff'
 
   if (proportional) {
-    const xMiddle = originPoint.x + width / 2
-    const yMiddle = originPoint.y + height / 2
+    const middlePoint = {
+      x: (originPoint.x + endPoint.x) / 2,
+      y: (originPoint.y + endPoint.y) / 2,
+    }
 
-    const distance = Math.sqrt(
-      Math.pow(xMiddle - originPoint.x, 2) +
-        Math.pow(yMiddle - originPoint.y, 2)
+    const radius = Math.sqrt(
+      Math.pow(middlePoint.x - originPoint.x, 2) +
+        Math.pow(middlePoint.y - originPoint.y, 2)
     )
 
     ctx.beginPath()
-    ctx.arc(xMiddle, yMiddle, distance, 0, Math.PI * 2)
+    ctx.arc(middlePoint.x, middlePoint.y, radius, 0, Math.PI * 2)
     ctx.stroke()
 
-    return
+    if (selected) {
+      const topLeftPoint = {
+        x: middlePoint.x - radius,
+        y: middlePoint.y - radius,
+      }
+
+      drawBoundingBox(ctx, topLeftPoint, radius * 2, radius * 2)
+    }
+  } else {
+    const width = endPoint.x - originPoint.x
+    const height = endPoint.y - originPoint.y
+
+    const kappa = 0.5522848,
+      ox = (width / 2) * kappa, // control point offset horizontal
+      oy = (height / 2) * kappa, // control point offset vertical
+      xe = originPoint.x + width, // x-end
+      ye = originPoint.y + height, // y-end
+      xm = originPoint.x + width / 2, // x-middle
+      ym = originPoint.y + height / 2 // y-middle
+
+    ctx.beginPath()
+    ctx.moveTo(originPoint.x, ym)
+    ctx.bezierCurveTo(
+      originPoint.x,
+      ym - oy,
+      xm - ox,
+      originPoint.y,
+      xm,
+      originPoint.y
+    )
+    ctx.bezierCurveTo(xm + ox, originPoint.y, xe, ym - oy, xe, ym)
+    ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye)
+    ctx.bezierCurveTo(xm - ox, ye, originPoint.x, ym + oy, originPoint.x, ym)
+    ctx.stroke()
+
+    if (selected) {
+      const boundingWidth = Math.abs(width)
+      const boundingHeight = Math.abs(height)
+      const topLeftPoint = getTopLeftPoint(
+        originPoint,
+        endPoint,
+        boundingWidth,
+        boundingHeight
+      )
+      drawBoundingBox(ctx, topLeftPoint, boundingWidth, boundingHeight)
+    }
   }
-
-  const kappa = 0.5522848,
-    ox = (width / 2) * kappa, // control point offset horizontal
-    oy = (height / 2) * kappa, // control point offset vertical
-    xe = originPoint.x + width, // x-end
-    ye = originPoint.y + height, // y-end
-    xm = originPoint.x + width / 2, // x-middle
-    ym = originPoint.y + height / 2 // y-middle
-
-  ctx.beginPath()
-  ctx.moveTo(originPoint.x, ym)
-  ctx.bezierCurveTo(
-    originPoint.x,
-    ym - oy,
-    xm - ox,
-    originPoint.y,
-    xm,
-    originPoint.y
-  )
-  ctx.bezierCurveTo(xm + ox, originPoint.y, xe, ym - oy, xe, ym)
-  ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye)
-  ctx.bezierCurveTo(xm - ox, ye, originPoint.x, ym + oy, originPoint.x, ym)
-  ctx.stroke()
 }
 
 export function drawRectangle(ctx, shape) {
   const { positions, proportional = false, selected = false } = shape
   const [originPoint, endPoint] = positions
 
-  const width = shape?.width ?? Math.abs(endPoint.x - originPoint.x)
-  const height = shape?.height ?? Math.abs(endPoint.y - originPoint.y)
+  const width = Math.abs(endPoint.x - originPoint.x)
+  const height = Math.abs(endPoint.y - originPoint.y)
 
   // TODO: remove mocked
   ctx.strokeStyle = '#fff'
@@ -108,7 +129,7 @@ export function drawRectangle(ctx, shape) {
   const offsetX = proportional ? maxOffset : width
   const offsetY = proportional ? maxOffset : height
 
-  const { x, y } = getTopLeftPoint(
+  const topLeftPoint = getTopLeftPoint(
     originPoint,
     endPoint,
     proportional ? maxOffset : width,
@@ -116,19 +137,13 @@ export function drawRectangle(ctx, shape) {
   )
 
   ctx.beginPath()
-  ctx.rect(x, y, offsetX, offsetY)
+  ctx.rect(topLeftPoint.x, topLeftPoint.y, offsetX, offsetY)
   ctx.stroke()
 
   if (selected) {
-    const startBoxPoint = getTopLeftPoint(
-      originPoint,
-      endPoint,
-      proportional ? maxOffset : width,
-      proportional ? maxOffset : height
-    )
     drawBoundingBox(
       ctx,
-      startBoxPoint,
+      topLeftPoint,
       proportional ? maxOffset : width,
       proportional ? maxOffset : height
     )
@@ -139,8 +154,8 @@ export function drawDiamond(ctx, shape) {
   const { positions, proportional = false } = shape
   const [originPoint, endPoint] = positions
 
-  const width = shape?.width ?? Math.abs(endPoint.x - originPoint.x)
-  const height = shape?.height ?? Math.abs(endPoint.y - originPoint.y)
+  const width = Math.abs(endPoint.x - originPoint.x)
+  const height = Math.abs(endPoint.y - originPoint.y)
 
   // TODO: remove mocked
   ctx.strokeStyle = '#fff'
@@ -167,9 +182,50 @@ export function drawDiamond(ctx, shape) {
   ctx.stroke()
 }
 
-export function hasSelectShape(selectPoint, shape) {
-  const { positions, width, height } = shape
-  const [p1, p2] = positions
+// TODO: remove mocked tools verification
+const allowedSelectedShapes = new Set(['rectangle', 'ellipse'])
+
+export function hasSelectEllipse(selectPoint, shape) {
+  const [p1, p2] = shape.positions
+
+  if (shape.proportional) {
+    const middlePoint = {
+      x: (p1.x + p2.x) / 2,
+      y: (p1.y + p2.y) / 2,
+    }
+
+    const radius = Math.sqrt(
+      Math.pow(middlePoint.x - p1.x, 2) + Math.pow(middlePoint.y - p1.y, 2)
+    )
+
+    return (
+      Math.pow(selectPoint.x - middlePoint.x, 2) +
+        Math.pow(selectPoint.y - middlePoint.y, 2) <=
+      Math.pow(radius, 2)
+    )
+  }
+
+  const width = Math.abs(p2.x - p1.x)
+  const height = Math.abs(p2.y - p1.y)
+  const boundingMinPoint = getTopLeftPoint(p1, p2, width, height)
+  const boundingMaxPoint = {
+    x: boundingMinPoint.x + width,
+    y: boundingMinPoint.y + height,
+  }
+
+  return (
+    selectPoint.x >= boundingMinPoint.x &&
+    selectPoint.x <= boundingMaxPoint.x &&
+    selectPoint.y >= boundingMinPoint.y &&
+    selectPoint.y <= boundingMaxPoint.y
+  )
+}
+
+function hasSelectedRectangle(selectPoint, shape) {
+  const [p1, p2] = shape.positions
+
+  const width = Math.abs(p2.x - p1.x)
+  const height = Math.abs(p2.y - p1.y)
 
   const boundingMinPoint = getTopLeftPoint(p1, p2, width, height)
   const boundingMaxPoint = {
@@ -177,28 +233,32 @@ export function hasSelectShape(selectPoint, shape) {
     y: Math.max(p1.y, p2.y),
   }
 
-  if (
+  return (
     selectPoint.x >= boundingMinPoint.x &&
     selectPoint.x <= boundingMaxPoint.x &&
     selectPoint.y >= boundingMinPoint.y &&
     selectPoint.y <= boundingMaxPoint.y
-  ) {
-    return true
+  )
+}
+
+export function hasSelectShape(selectPoint, shape) {
+  if (!allowedSelectedShapes.has(shape.type)) {
+    return false
   }
 
-  return false
+  const handleSelectionFn = new Map([
+    ['rectangle', hasSelectedRectangle],
+    ['ellipse', hasSelectEllipse],
+  ])
+
+  const selectionFn = handleSelectionFn.get(shape.type)
+  return selectionFn?.(selectPoint, shape) ?? false
 }
 
 export function createShape({ type, proportional, positions }) {
-  const [p1, p2] = positions
-  const width = Math.abs(p2.x - p1.x)
-  const height = Math.abs(p2.y - p1.y)
-
   return {
     id: new Date().toISOString(),
     type,
-    width,
-    height,
     proportional,
     positions,
   }
