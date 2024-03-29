@@ -13,7 +13,7 @@ import {
 
 const paintContext = createContext({
   mode: 'selection',
-  changeMode: () => {},
+  changeTool: () => {},
   handlePaint: () => {},
   draw: () => {},
   isDrawing: false,
@@ -38,6 +38,8 @@ export const PaintProvider = ({ children }) => {
 
   const mode = usePaintStore((store) => store.mode)
   const setMode = usePaintStore((store) => store.setMode)
+  const tool = usePaintStore((store) => store.tool)
+  const setTool = usePaintStore((store) => store.setTool)
 
   const isHovering = usePaintStore((store) => store.isHovering)
   const setIsHovering = usePaintStore((store) => store.setIsHovering)
@@ -76,12 +78,15 @@ export const PaintProvider = ({ children }) => {
     draw()
   }, [shapes, previewPoint, selectedShape])
 
-  function changeMode(newMode) {
-    setMode(newMode)
+  function changeTool(newTool) {
+    setTool(newTool)
 
-    if (newMode !== 'selection') {
+    if (newTool !== 'selection') {
       setSelectedShape(null)
+      setMode("drawing")
       setIsHovering(false)
+    } else {
+      setMode("selection")
     }
   }
 
@@ -97,7 +102,7 @@ export const PaintProvider = ({ children }) => {
     if (originPoint.x !== x && originPoint.y !== y) {
       addShape(
         createShape({
-          type: mode,
+          type: tool,
           proportional,
           positions: [originPoint, { x, y }],
         })
@@ -109,7 +114,7 @@ export const PaintProvider = ({ children }) => {
 
   function drawPreview() {
     if (isDrawing) {
-      const drawFn = drawByType[mode]
+      const drawFn = drawByType[tool]
       if (drawFn) {
         drawFn(ctx.current, {
           positions: [originPoint, previewPoint],
@@ -185,7 +190,8 @@ export const PaintProvider = ({ children }) => {
     <paintContext.Provider
       value={{
         mode,
-        changeMode,
+        tool,
+        changeTool,
         handlePaint,
         draw,
         isDrawing,

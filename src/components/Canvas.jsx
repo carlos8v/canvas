@@ -8,7 +8,7 @@ export const Canvas = forwardRef((props, ref) => {
   const [canvasWidth, setCanvasWidth] = useState(0)
   const [canvasHeight, setCanvasHeight] = useState(0)
 
-  const { mode, draw, selectedShape, isHovering } = usePaintContext()
+  const { mode, draw, isHovering } = usePaintContext()
 
   useEffect(() => {
     getCanvasDimensions()

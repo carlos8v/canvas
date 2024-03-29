@@ -62,7 +62,7 @@ const tools = [
 ]
 
 export const Tools = () => {
-  const { changeMode } = usePaintContext()
+  const { changeTool } = usePaintContext()
   const [selectedToolIdx, setSelectedToolIdx] = useState(0)
 
   useEffect(() => {
@@ -76,7 +76,7 @@ export const Tools = () => {
   }, [])
 
   function handleSelectTool(id, idx) {
-    changeMode(id)
+    changeTool(id)
     setSelectedToolIdx(idx)
   }
 

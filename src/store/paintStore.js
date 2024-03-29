@@ -1,6 +1,10 @@
 import { create } from 'zustand'
 
 export const usePaintStore = create((set) => ({
+  mode: 'selection',
+  setMode: (mode) => set({ mode }),
+  tool: 'selection',
+  setTool: (tool) => set({ tool }),
   shapes: [],
   addShape: (newShape) => {
     set(({ shapes: prevShapes }) => ({
@@ -13,8 +17,6 @@ export const usePaintStore = create((set) => ({
   setSelectedShape: (selectedShape) => set({ selectedShape }),
   proportional: false,
   setProportional: (proportional) => set({ proportional }),
-  mode: 'selection',
-  setMode: (mode) => set({ mode }),
   isDrawing: false,
   setIsDrawing: (isDrawing) => set({ isDrawing }),
   previewPoint: { x: 0, y: 0 },

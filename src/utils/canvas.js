@@ -1,3 +1,23 @@
+/**
+ * @typedef {Object} Position
+ * @property {number} x
+ * @property {number} y
+ */
+
+/**
+ * @typedef {Object} Shape
+ * @property {Position[]} positions
+ * @property {boolean} proportional
+ * @property {boolean} selected
+ */
+
+/**
+ * @param {Position} p1 
+ * @param {Position} p2 
+ * @param {number} offsetX 
+ * @param {number} offsetY 
+ * @returns {Position}
+ */
 function getTopLeftPoint(p1, p2, offsetX = 0, offsetY = 0) {
   return {
     x: p1.x <= p2.x ? p1.x : p1.x - offsetX,
@@ -5,6 +25,9 @@ function getTopLeftPoint(p1, p2, offsetX = 0, offsetY = 0) {
   }
 }
 
+/** 
+ * @param {CanvasRenderingContext2D} ctx 
+ */
 export function drawBackground(ctx) {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
@@ -13,6 +36,12 @@ export function drawBackground(ctx) {
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 }
 
+/**
+ * @param {CanvasRenderingContext2D} ctx 
+ * @param {Position} originPoint 
+ * @param {number} width 
+ * @param {number} height 
+ */
 export function drawBoundingBox(ctx, originPoint, width, height) {
   const padding = 10
 
@@ -30,6 +59,10 @@ export function drawBoundingBox(ctx, originPoint, width, height) {
   ctx.stroke()
 }
 
+/**
+ * @param {CanvasRenderingContext2D} ctx 
+ * @param {Shape} shape 
+ */
 export function drawLine(ctx, { positions }) {
   const [originPoint, endPoint] = positions
 
@@ -43,6 +76,10 @@ export function drawLine(ctx, { positions }) {
   ctx.stroke()
 }
 
+/**
+ * @param {CanvasRenderingContext2D} ctx 
+ * @param {Shape} shape 
+ */
 export function drawEllipse(ctx, shape) {
   const { positions, proportional = false, selected = false } = shape
   const [originPoint, endPoint] = positions
@@ -114,6 +151,10 @@ export function drawEllipse(ctx, shape) {
   }
 }
 
+/**
+ * @param {CanvasRenderingContext2D} ctx 
+ * @param {Shape} shape 
+ */
 export function drawRectangle(ctx, shape) {
   const { positions, proportional = false, selected = false } = shape
   const [originPoint, endPoint] = positions
@@ -150,6 +191,10 @@ export function drawRectangle(ctx, shape) {
   }
 }
 
+/**
+ * @param {CanvasRenderingContext2D} ctx 
+ * @param {Shape} shape 
+ */
 export function drawDiamond(ctx, shape) {
   const { positions, proportional = false } = shape
   const [originPoint, endPoint] = positions
@@ -185,6 +230,10 @@ export function drawDiamond(ctx, shape) {
 // TODO: remove mocked tools verification
 const allowedSelectedShapes = new Set(['rectangle', 'ellipse'])
 
+/**
+ * @param {Position} selectPoint 
+ * @param {Shape} shape 
+ */
 export function hasSelectEllipse(selectPoint, shape) {
   const [p1, p2] = shape.positions
 
@@ -221,6 +270,10 @@ export function hasSelectEllipse(selectPoint, shape) {
   )
 }
 
+/**
+ * @param {Position} selectPoint 
+ * @param {Shape} shape 
+ */
 function hasSelectedRectangle(selectPoint, shape) {
   const [p1, p2] = shape.positions
 
@@ -241,6 +294,10 @@ function hasSelectedRectangle(selectPoint, shape) {
   )
 }
 
+/**
+ * @param {Position} ctx 
+ * @param {Shape} shape 
+ */
 export function hasSelectShape(selectPoint, shape) {
   if (!allowedSelectedShapes.has(shape.type)) {
     return false
