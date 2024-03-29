@@ -20,7 +20,7 @@ export const boundingBoxPadding = 10
  * @param {number} offsetY
  * @returns {Position}
  */
-export function getTopLeftPoint(p1, p2, offsetX = 0, offsetY = 0) {
+export function getTopLeftPosition(p1, p2, offsetX = 0, offsetY = 0) {
   return {
     x: p1.x <= p2.x ? p1.x : p1.x - offsetX,
     y: p1.y <= p2.y ? p1.y : p1.y - offsetY,
@@ -28,125 +28,131 @@ export function getTopLeftPoint(p1, p2, offsetX = 0, offsetY = 0) {
 }
 
 /**
- * @param {Position} selectPoint
- * @param {Position} topLeftPoint
- * @param {Position} bottomRightPoint
+ * @param {Position} selectPosition
+ * @param {Position} topLeftPosition
+ * @param {Position} bottomRightPosition
  */
 export function isInsideRectangle(
-  selectPoint,
-  topLeftPoint,
-  bottomRightPoint,
+  selectPosition,
+  topLeftPosition,
+  bottomRightPosition,
   offset = 0
 ) {
   return (
-    selectPoint.x >= topLeftPoint.x - offset &&
-    selectPoint.x <= bottomRightPoint.x + offset &&
-    selectPoint.y >= topLeftPoint.y - offset &&
-    selectPoint.y <= bottomRightPoint.y + offset
+    selectPosition.x >= topLeftPosition.x - offset &&
+    selectPosition.x <= bottomRightPosition.x + offset &&
+    selectPosition.y >= topLeftPosition.y - offset &&
+    selectPosition.y <= bottomRightPosition.y + offset
   )
 }
 
 /**
- * @param {Position} originPoint
+ * @param {Position} originPosition
  * @param {number} width
  * @param {number} height
- * @returns {[Position, Position, Position, Position]} boundingPoints
+ * @returns {[Position, Position, Position, Position]} boundingPositions
  */
-export function getBoundingBoxPoints(originPoint, width, height) {
-  const topLeftPoint = {
-    x: originPoint.x - boundingBoxPadding,
-    y: originPoint.y - boundingBoxPadding,
+export function getBoundingBoxPositions(originPosition, width, height) {
+  const topLeftPosition = {
+    x: originPosition.x - boundingBoxPadding,
+    y: originPosition.y - boundingBoxPadding,
   }
-  const topRightPoint = {
-    x: originPoint.x + width + boundingBoxPadding,
-    y: originPoint.y - boundingBoxPadding,
+  const topRightPosition = {
+    x: originPosition.x + width + boundingBoxPadding,
+    y: originPosition.y - boundingBoxPadding,
   }
-  const bottomRightPoint = {
-    x: originPoint.x + width + boundingBoxPadding,
-    y: originPoint.y + height + boundingBoxPadding,
+  const bottomRightPosition = {
+    x: originPosition.x + width + boundingBoxPadding,
+    y: originPosition.y + height + boundingBoxPadding,
   }
-  const bottomLeftPoint = {
-    x: originPoint.x - boundingBoxPadding,
-    y: originPoint.y + height + boundingBoxPadding,
+  const bottomLeftPosition = {
+    x: originPosition.x - boundingBoxPadding,
+    y: originPosition.y + height + boundingBoxPadding,
   }
 
-  return [topLeftPoint, topRightPoint, bottomRightPoint, bottomLeftPoint]
+  return [
+    topLeftPosition,
+    topRightPosition,
+    bottomRightPosition,
+    bottomLeftPosition,
+  ]
 }
 
 /**
- * @param {Position} selectPoint
+ * @param {Position} selectPosition
  * @param {Shape} shape
  */
-export function hasSelectEllipse(selectPoint, shape) {
+export function hasSelectEllipse(selectPosition, shape) {
   const [p1, p2] = shape.positions
 
   if (shape.proportional) {
-    const middlePoint = {
+    const middlePosition = {
       x: (p1.x + p2.x) / 2,
       y: (p1.y + p2.y) / 2,
     }
 
     const radius = Math.sqrt(
-      Math.pow(middlePoint.x - p1.x, 2) + Math.pow(middlePoint.y - p1.y, 2)
+      Math.pow(middlePosition.x - p1.x, 2) +
+        Math.pow(middlePosition.y - p1.y, 2)
     )
 
     if (!shape.selected) {
       return (
-        Math.pow(selectPoint.x - middlePoint.x, 2) +
-          Math.pow(selectPoint.y - middlePoint.y, 2) <=
+        Math.pow(selectPosition.x - middlePosition.x, 2) +
+          Math.pow(selectPosition.y - middlePosition.y, 2) <=
         Math.pow(radius + boundingBoxPadding, 2)
       )
     }
 
-    const topLeftPoint = {
-      x: middlePoint.x - radius,
-      y: middlePoint.y - radius,
+    const topLeftPosition = {
+      x: middlePosition.x - radius,
+      y: middlePosition.y - radius,
     }
-    const bottomRightPoint = {
-      x: topLeftPoint.x + radius * 2,
-      y: topLeftPoint.y + radius * 2,
+    const bottomRightPosition = {
+      x: topLeftPosition.x + radius * 2,
+      y: topLeftPosition.y + radius * 2,
     }
 
     return isInsideRectangle(
-      selectPoint,
-      topLeftPoint,
-      bottomRightPoint,
+      selectPosition,
+      topLeftPosition,
+      bottomRightPosition,
       boundingBoxPadding
     )
   }
 
   const width = Math.abs(p2.x - p1.x)
   const height = Math.abs(p2.y - p1.y)
-  const topLeftPoint = getTopLeftPoint(p1, p2, width, height)
-  const bottomRightPoint = {
-    x: topLeftPoint.x + width,
-    y: topLeftPoint.y + height,
+  const topLeftPosition = getTopLeftPosition(p1, p2, width, height)
+  const bottomRightPosition = {
+    x: topLeftPosition.x + width,
+    y: topLeftPosition.y + height,
   }
 
   return isInsideRectangle(
-    selectPoint,
-    topLeftPoint,
-    bottomRightPoint,
+    selectPosition,
+    topLeftPosition,
+    bottomRightPosition,
     boundingBoxPadding
   )
 }
 
 /**
- * @param {Position} selectPoint
+ * @param {Position} selectPosition
  * @param {Shape} shape
  */
-export function hasSelectedRectangle(selectPoint, shape) {
+export function hasSelectedRectangle(selectPosition, shape) {
   const [p1, p2] = shape.positions
 
   const width = Math.abs(p2.x - p1.x)
   const height = Math.abs(p2.y - p1.y)
-  const topLeftPoint = getTopLeftPoint(p1, p2, width, height)
+  const topLeftPosition = getTopLeftPosition(p1, p2, width, height)
 
-  const [boundingTopLeft, _, boundingBottomRight] = getBoundingBoxPoints(
-    topLeftPoint,
+  const [boundingTopLeft, _, boundingBottomRight] = getBoundingBoxPositions(
+    topLeftPosition,
     width,
     height
   )
 
-  return isInsideRectangle(selectPoint, boundingTopLeft, boundingBottomRight)
+  return isInsideRectangle(selectPosition, boundingTopLeft, boundingBottomRight)
 }

@@ -19,8 +19,8 @@ export const usePaintStore = create((set) => ({
   setProportional: (proportional) => set({ proportional }),
   isDrawing: false,
   setIsDrawing: (isDrawing) => set({ isDrawing }),
-  previewPoint: { x: 0, y: 0 },
-  setPreviewPoint: ({ x, y }) => set({ previewPoint: { x, y } }),
-  originPoint: { x: 0, y: 0 },
-  setOriginPoint: ({ x, y }) => set({ originPoint: { x, y } }),
+  previewPosition: { x: 0, y: 0 },
+  setPreviewPosition: ({ x, y }) => set({ previewPosition: { x, y } }),
+  originPosition: { x: 0, y: 0 },
+  setOriginPosition: ({ x, y }) => set({ originPosition: { x, y } }),
 }))

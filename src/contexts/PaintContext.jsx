@@ -17,7 +17,7 @@ const paintContext = createContext({
   handlePaint: () => {},
   draw: () => {},
   isDrawing: false,
-  setPreviewPoint: () => {},
+  setPreviewPosition: () => {},
   cancelPreview: () => {},
   selectedShape: null,
   selectShape: () => {},
@@ -50,11 +50,11 @@ export const PaintProvider = ({ children }) => {
   const proportional = usePaintStore((store) => store.proportional)
   const setProportional = usePaintStore((store) => store.setProportional)
 
-  const originPoint = usePaintStore((store) => store.originPoint)
-  const setOriginPoint = usePaintStore((store) => store.setOriginPoint)
+  const originPosition = usePaintStore((store) => store.originPosition)
+  const setOriginPosition = usePaintStore((store) => store.setOriginPosition)
 
-  const previewPoint = usePaintStore((store) => store.previewPoint)
-  const setPreviewPoint = usePaintStore((store) => store.setPreviewPoint)
+  const previewPosition = usePaintStore((store) => store.previewPosition)
+  const setPreviewPosition = usePaintStore((store) => store.setPreviewPosition)
 
   useEffect(() => {
     const events = [
@@ -76,7 +76,7 @@ export const PaintProvider = ({ children }) => {
 
   useEffect(() => {
     draw()
-  }, [shapes, previewPoint, selectedShape])
+  }, [shapes, previewPosition, selectedShape])
 
   function changeTool(newTool) {
     setTool(newTool)
@@ -92,24 +92,24 @@ export const PaintProvider = ({ children }) => {
 
   function handlePaint({ x, y }) {
     if (!isDrawing) {
-      setOriginPoint({ x, y })
+      setOriginPosition({ x, y })
       setIsDrawing(true)
       return
     }
 
     setIsDrawing(false)
 
-    if (originPoint.x !== x && originPoint.y !== y) {
+    if (originPosition.x !== x && originPosition.y !== y) {
       addShape(
         createShape({
           type: tool,
           proportional,
-          positions: [originPoint, { x, y }],
+          positions: [originPosition, { x, y }],
         })
       )
     }
 
-    setOriginPoint({ x: 0, y: 0 })
+    setOriginPosition({ x: 0, y: 0 })
   }
 
   function drawPreview() {
@@ -117,18 +117,11 @@ export const PaintProvider = ({ children }) => {
       const drawFn = drawByType[tool]
       if (drawFn) {
         drawFn(ctx.current, {
-          positions: [originPoint, previewPoint],
+          positions: [originPosition, previewPosition],
           proportional,
         })
       }
     }
-  }
-
-  function drawSelection() {
-    if (!Boolean(selectedShape?.id)) return
-
-    const drawFn = drawByType[selectedShape.type]
-    if (drawFn) drawFn(ctx.current, { ...selectedShape, selected: true })
   }
 
   function draw() {
@@ -137,20 +130,23 @@ export const PaintProvider = ({ children }) => {
     drawBackground(ctx.current)
     for (const shape of shapes) {
       const drawFn = drawByType[shape.type]
-      if (drawFn) drawFn(ctx.current, shape)
+      if (drawFn)
+        drawFn(ctx.current, {
+          ...shape,
+          selected: selectedShape?.id === shape.id,
+        })
     }
     drawPreview()
-    drawSelection()
   }
 
-  function isHoveringShape(selectPoint) {
+  function isHoveringShape(selectPosition) {
     for (const shape of shapes) {
       if (mode !== 'selection') continue
 
       if (
-        hasSelectShape(selectPoint, {
+        hasSelectShape(selectPosition, {
           ...shape,
-          selected: Boolean(selectedShape?.id),
+          selected: selectedShape?.id === shape.id,
         })
       ) {
         return shape
@@ -160,22 +156,22 @@ export const PaintProvider = ({ children }) => {
     return null
   }
 
-  function selectShape(selectPoint) {
+  function selectShape(selectPosition) {
     if (mode !== 'selection') return
-    const hoveredShape = isHoveringShape(selectPoint)
+    const hoveredShape = isHoveringShape(selectPosition)
     setSelectedShape(hoveredShape ?? null)
   }
 
-  function checkHoveringShape(selectPoint) {
+  function checkHoveringShape(selectPosition) {
     if (mode !== 'selection') return
-    const hoveredShape = isHoveringShape(selectPoint)
+    const hoveredShape = isHoveringShape(selectPosition)
     setIsHovering(Boolean(hoveredShape?.id))
   }
 
   function cancelPreview() {
     setIsDrawing(false)
-    setOriginPoint({ x: 0, y: 0 })
-    setPreviewPoint({ x: 0, y: 0 })
+    setOriginPosition({ x: 0, y: 0 })
+    setPreviewPosition({ x: 0, y: 0 })
   }
 
   return (
@@ -187,7 +183,7 @@ export const PaintProvider = ({ children }) => {
         handlePaint,
         draw,
         isDrawing,
-        setPreviewPoint,
+        setPreviewPosition,
         cancelPreview,
         selectedShape,
         selectShape,

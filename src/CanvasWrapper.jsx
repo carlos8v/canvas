@@ -13,7 +13,7 @@ export function CanvasWrapper() {
     mode,
     handlePaint,
     isDrawing,
-    setPreviewPoint,
+    setPreviewPosition,
     cancelPreview,
     selectShape,
     checkHoveringShape,
@@ -69,7 +69,7 @@ export function CanvasWrapper() {
     }
 
     if (isDrawing) {
-      setPreviewPoint({
+      setPreviewPosition({
         x: e.clientX,
         y: e.clientY,
       })
