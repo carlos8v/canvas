@@ -83,10 +83,10 @@ export const PaintProvider = ({ children }) => {
 
     if (newTool !== 'selection') {
       setSelectedShape(null)
-      setMode("drawing")
+      setMode('drawing')
       setIsHovering(false)
     } else {
-      setMode("selection")
+      setMode('selection')
     }
   }
 
@@ -125,7 +125,7 @@ export const PaintProvider = ({ children }) => {
   }
 
   function drawSelection() {
-    if (!selectedShape) return
+    if (!Boolean(selectedShape?.id)) return
 
     const drawFn = drawByType[selectedShape.type]
     if (drawFn) drawFn(ctx.current, { ...selectedShape, selected: true })
@@ -143,24 +143,16 @@ export const PaintProvider = ({ children }) => {
     drawSelection()
   }
 
-  function selectShape(selectPoint) {
-    for (const shape of shapes) {
-      if (shape.type === 'line') continue
-
-      if (hasSelectShape(selectPoint, shape)) {
-        setSelectedShape(shape)
-        break
-      } else {
-        setSelectedShape(null)
-      }
-    }
-  }
-
   function isHoveringShape(selectPoint) {
     for (const shape of shapes) {
-      if (shape.type === 'line') continue
+      if (mode !== 'selection') continue
 
-      if (hasSelectShape(selectPoint, shape)) {
+      if (
+        hasSelectShape(selectPoint, {
+          ...shape,
+          selected: Boolean(selectedShape?.id),
+        })
+      ) {
         return shape
       }
     }

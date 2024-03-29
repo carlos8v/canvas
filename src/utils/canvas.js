@@ -1,73 +1,66 @@
-/**
- * @typedef {Object} Position
- * @property {number} x
- * @property {number} y
- */
+const lineColor = '#FFFFFF'
+const backgroundColor = '#09090B'
+const selectionColor = '#8B5CF6'
+
+import {
+  boundingBoxPadding,
+  getBoundingBoxPoints,
+  getTopLeftPoint,
+  hasSelectEllipse,
+  hasSelectedRectangle,
+} from './shape'
 
 /**
- * @typedef {Object} Shape
- * @property {Position[]} positions
- * @property {boolean} proportional
- * @property {boolean} selected
- */
-
-/**
- * @param {Position} p1 
- * @param {Position} p2 
- * @param {number} offsetX 
- * @param {number} offsetY 
- * @returns {Position}
- */
-function getTopLeftPoint(p1, p2, offsetX = 0, offsetY = 0) {
-  return {
-    x: p1.x <= p2.x ? p1.x : p1.x - offsetX,
-    y: p1.y <= p2.y ? p1.y : p1.y - offsetY,
-  }
-}
-
-/** 
- * @param {CanvasRenderingContext2D} ctx 
+ * @param {CanvasRenderingContext2D} ctx
  */
 export function drawBackground(ctx) {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
-  // TODO: remove mocked
-  ctx.fillStyle = '#09090B'
+  ctx.fillStyle = backgroundColor
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 }
 
 /**
- * @param {CanvasRenderingContext2D} ctx 
- * @param {Position} originPoint 
- * @param {number} width 
- * @param {number} height 
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {import('./shape').Position} originPoint
+ * @param {number} width
+ * @param {number} height
  */
 export function drawBoundingBox(ctx, originPoint, width, height) {
-  const padding = 10
-
-  // TODO: remove mocked
-  ctx.strokeStyle = '#8B5CF6'
+  ctx.fillStyle = selectionColor
+  ctx.strokeStyle = selectionColor
   ctx.lineWidth = 2
 
+  // Draw box
   ctx.beginPath()
   ctx.rect(
-    originPoint.x - padding,
-    originPoint.y - padding,
-    width + padding * 2,
-    height + padding * 2
+    originPoint.x - boundingBoxPadding,
+    originPoint.y - boundingBoxPadding,
+    width + boundingBoxPadding * 2,
+    height + boundingBoxPadding * 2
   )
   ctx.stroke()
+
+  // Draw box corners
+  for (const boundingPoint of getBoundingBoxPoints(
+    originPoint,
+    width,
+    height
+  )) {
+    ctx.beginPath()
+    ctx.arc(boundingPoint.x, boundingPoint.y, 5, 0, Math.PI * 2)
+    ctx.fill()
+  }
 }
 
 /**
- * @param {CanvasRenderingContext2D} ctx 
- * @param {Shape} shape 
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {import('./shape').Shape} shape
  */
 export function drawLine(ctx, { positions }) {
   const [originPoint, endPoint] = positions
 
-  // TODO: remove mocked
-  ctx.strokeStyle = '#fff'
+  ctx.strokeStyle = lineColor
   ctx.lineWidth = 2
 
   ctx.beginPath()
@@ -77,15 +70,14 @@ export function drawLine(ctx, { positions }) {
 }
 
 /**
- * @param {CanvasRenderingContext2D} ctx 
- * @param {Shape} shape 
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {import('./shape').Shape} shape
  */
 export function drawEllipse(ctx, shape) {
   const { positions, proportional = false, selected = false } = shape
   const [originPoint, endPoint] = positions
 
-  // TODO: remove mocked
-  ctx.strokeStyle = '#fff'
+  ctx.strokeStyle = lineColor
 
   if (proportional) {
     const middlePoint = {
@@ -152,8 +144,8 @@ export function drawEllipse(ctx, shape) {
 }
 
 /**
- * @param {CanvasRenderingContext2D} ctx 
- * @param {Shape} shape 
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {import('./shape').Shape} shape
  */
 export function drawRectangle(ctx, shape) {
   const { positions, proportional = false, selected = false } = shape
@@ -162,8 +154,7 @@ export function drawRectangle(ctx, shape) {
   const width = Math.abs(endPoint.x - originPoint.x)
   const height = Math.abs(endPoint.y - originPoint.y)
 
-  // TODO: remove mocked
-  ctx.strokeStyle = '#fff'
+  ctx.strokeStyle = lineColor
   ctx.lineWidth = 2
 
   const maxOffset = Math.max(width, height)
@@ -192,8 +183,8 @@ export function drawRectangle(ctx, shape) {
 }
 
 /**
- * @param {CanvasRenderingContext2D} ctx 
- * @param {Shape} shape 
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {import('./shape').Shape} shape
  */
 export function drawDiamond(ctx, shape) {
   const { positions, proportional = false } = shape
@@ -202,8 +193,7 @@ export function drawDiamond(ctx, shape) {
   const width = Math.abs(endPoint.x - originPoint.x)
   const height = Math.abs(endPoint.y - originPoint.y)
 
-  // TODO: remove mocked
-  ctx.strokeStyle = '#fff'
+  ctx.strokeStyle = lineColor
   ctx.lineWidth = 2
 
   const offset = Math.max(width, height)
@@ -231,72 +221,8 @@ export function drawDiamond(ctx, shape) {
 const allowedSelectedShapes = new Set(['rectangle', 'ellipse'])
 
 /**
- * @param {Position} selectPoint 
- * @param {Shape} shape 
- */
-export function hasSelectEllipse(selectPoint, shape) {
-  const [p1, p2] = shape.positions
-
-  if (shape.proportional) {
-    const middlePoint = {
-      x: (p1.x + p2.x) / 2,
-      y: (p1.y + p2.y) / 2,
-    }
-
-    const radius = Math.sqrt(
-      Math.pow(middlePoint.x - p1.x, 2) + Math.pow(middlePoint.y - p1.y, 2)
-    )
-
-    return (
-      Math.pow(selectPoint.x - middlePoint.x, 2) +
-        Math.pow(selectPoint.y - middlePoint.y, 2) <=
-      Math.pow(radius, 2)
-    )
-  }
-
-  const width = Math.abs(p2.x - p1.x)
-  const height = Math.abs(p2.y - p1.y)
-  const boundingMinPoint = getTopLeftPoint(p1, p2, width, height)
-  const boundingMaxPoint = {
-    x: boundingMinPoint.x + width,
-    y: boundingMinPoint.y + height,
-  }
-
-  return (
-    selectPoint.x >= boundingMinPoint.x &&
-    selectPoint.x <= boundingMaxPoint.x &&
-    selectPoint.y >= boundingMinPoint.y &&
-    selectPoint.y <= boundingMaxPoint.y
-  )
-}
-
-/**
- * @param {Position} selectPoint 
- * @param {Shape} shape 
- */
-function hasSelectedRectangle(selectPoint, shape) {
-  const [p1, p2] = shape.positions
-
-  const width = Math.abs(p2.x - p1.x)
-  const height = Math.abs(p2.y - p1.y)
-
-  const boundingMinPoint = getTopLeftPoint(p1, p2, width, height)
-  const boundingMaxPoint = {
-    x: Math.max(p1.x, p2.x),
-    y: Math.max(p1.y, p2.y),
-  }
-
-  return (
-    selectPoint.x >= boundingMinPoint.x &&
-    selectPoint.x <= boundingMaxPoint.x &&
-    selectPoint.y >= boundingMinPoint.y &&
-    selectPoint.y <= boundingMaxPoint.y
-  )
-}
-
-/**
- * @param {Position} ctx 
- * @param {Shape} shape 
+ * @param {import('./shape').Position} selectPoint
+ * @param {import('./shape').Shape} shape
  */
 export function hasSelectShape(selectPoint, shape) {
   if (!allowedSelectedShapes.has(shape.type)) {
