@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Canvas } from './components/Canvas'
 import { Tools } from './components/Tools'
+import { ObjectOptions } from './components/ObjectOptions'
 
 import { CanvasProvider } from './contexts/CanvasContext'
 import { usePaintContext } from './contexts/PaintContext'
@@ -80,6 +81,7 @@ export function CanvasWrapper() {
     <CanvasProvider>
       <main className="min-w-screen min-h-screen flex flex-col bg-zinc-950">
         <Tools />
+        <ObjectOptions />
         <Canvas
           ref={canvasRef}
           onMouseDown={handleOriginPosition}

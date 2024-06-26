@@ -47,6 +47,9 @@ export const PaintProvider = ({ children }) => {
   const isDrawing = usePaintStore((store) => store.isDrawing)
   const setIsDrawing = usePaintStore((store) => store.setIsDrawing)
 
+  const borderColor = usePaintStore((store) => store.borderColor)
+  const shapeColor = usePaintStore((store) => store.shapeColor)
+
   const proportional = usePaintStore((store) => store.proportional)
   const setProportional = usePaintStore((store) => store.setProportional)
 
@@ -104,6 +107,8 @@ export const PaintProvider = ({ children }) => {
         createShape({
           type: tool,
           proportional,
+          shapeColor,
+          borderColor,
           positions: [originPosition, { x, y }],
         })
       )
@@ -118,6 +123,8 @@ export const PaintProvider = ({ children }) => {
       if (drawFn) {
         drawFn(ctx.current, {
           positions: [originPosition, previewPosition],
+          borderColor,
+          shapeColor,
           proportional,
         })
       }
@@ -140,7 +147,7 @@ export const PaintProvider = ({ children }) => {
   }
 
   function isHoveringShape(selectPosition) {
-    for (const shape of shapes) {
+    for (const shape of [...shapes].reverse()) {
       if (mode !== 'selection') continue
 
       if (

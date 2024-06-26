@@ -1,5 +1,4 @@
-const lineWidth = 2
-const lineColor = '#FFFFFF'
+const lineWidth = 3
 const backgroundColor = '#09090B'
 const selectionColor = '#8B5CF6'
 
@@ -58,10 +57,10 @@ export function drawBoundingBox(ctx, originPosition, width, height) {
  * @param {CanvasRenderingContext2D} ctx
  * @param {import('./shape').Shape} shape
  */
-export function drawLine(ctx, { positions }) {
+export function drawLine(ctx, { positions, borderColor }) {
   const [originPosition, endPosition] = positions
 
-  ctx.strokeStyle = lineColor
+  ctx.strokeStyle = borderColor
   ctx.lineWidth = lineWidth
 
   ctx.beginPath()
@@ -79,7 +78,8 @@ export function drawEllipse(ctx, shape) {
   const [originPosition, endPosition] = positions
 
   ctx.lineWidth = lineWidth
-  ctx.strokeStyle = lineColor
+  ctx.strokeStyle = shape.borderColor
+  ctx.fillStyle = shape.shapeColor
 
   if (proportional) {
     const middlePosition = {
@@ -94,6 +94,7 @@ export function drawEllipse(ctx, shape) {
 
     ctx.beginPath()
     ctx.arc(middlePosition.x, middlePosition.y, radius, 0, Math.PI * 2)
+    ctx.fill()
     ctx.stroke()
 
     if (selected) {
@@ -136,6 +137,7 @@ export function drawEllipse(ctx, shape) {
       originPosition.x,
       ym
     )
+    ctx.fill()
     ctx.stroke()
 
     if (selected) {
@@ -163,7 +165,8 @@ export function drawRectangle(ctx, shape) {
   const width = Math.abs(endPosition.x - originPosition.x)
   const height = Math.abs(endPosition.y - originPosition.y)
 
-  ctx.strokeStyle = lineColor
+  ctx.fillStyle = shape.shapeColor
+  ctx.strokeStyle = shape.borderColor
   ctx.lineWidth = lineWidth
 
   const maxOffset = Math.max(width, height)
@@ -179,6 +182,7 @@ export function drawRectangle(ctx, shape) {
 
   ctx.beginPath()
   ctx.rect(topLeftPosition.x, topLeftPosition.y, offsetX, offsetY)
+  ctx.fill()
   ctx.stroke()
 
   if (selected) {
@@ -202,7 +206,8 @@ export function drawDiamond(ctx, shape) {
   const width = Math.abs(endPosition.x - originPosition.x)
   const height = Math.abs(endPosition.y - originPosition.y)
 
-  ctx.strokeStyle = lineColor
+  ctx.fillStyle = shape.shapeColor
+  ctx.strokeStyle = shape.borderColor
   ctx.lineWidth = lineWidth
 
   const offset = Math.max(width, height)
@@ -223,6 +228,7 @@ export function drawDiamond(ctx, shape) {
   ctx.lineTo(xm, y + offsetY) // bottom left edge
   ctx.lineTo(xm + offsetX / 2, ym) // bottom right edge
   ctx.lineTo(xm, y) // top right edge
+  ctx.fill()
   ctx.stroke()
 }
 
@@ -247,11 +253,23 @@ export function hasSelectShape(selectPosition, shape) {
   return selectionFn?.(selectPosition, shape) ?? false
 }
 
-export function createShape({ type, proportional, positions }) {
+/**
+ * @param {import('./shape').Shape} shape
+ */
+export function createShape({
+  type,
+  proportional,
+  positions,
+  shapeColor,
+  borderColor,
+}) {
   return {
     id: new Date().toISOString(),
     type,
     proportional,
+    shapeColor,
+    borderColor,
+    selected: false,
     positions,
   }
 }

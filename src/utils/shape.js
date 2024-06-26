@@ -10,6 +10,8 @@ export const boundingBoxPadding = 10
  * @typedef {Object} Shape
  * @property {Position[]} positions
  * @property {boolean} proportional
+ * @property {string} shapeColor
+ * @property {string} borderColor
  * @property {boolean} selected
  */
 
