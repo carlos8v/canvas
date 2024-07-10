@@ -29,10 +29,10 @@ Virtual whiteboard sketching app
     - [ ] Resize box
     - [ ] Rotate box
   - [ ] Colors
-    - [ ] Default pallete
+    - [x] Default pallete
     - [ ] Custom pallete
-    - [ ] Border colors
-    - [ ] Background colors
+    - [x] Background colors
+    - [x] Stroke colors
     - [ ] Stroke width
     - [ ] Stroke style
 - [ ] History
